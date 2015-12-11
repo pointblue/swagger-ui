@@ -33,7 +33,7 @@
       if (url && url.length > 1) {
         url = decodeURIComponent(url[1]);
       } else {
-        url = "http://petstore.swagger.io/v2/swagger.json";
+        url = "http://localhost:8080/api/docs/v2/rwi_rancher_db.swagger.yaml";
       }
 
       // Pre load translate...
@@ -73,22 +73,27 @@
         showRequestHeaders: false
       });
 
-      function addApiKeyAuthorization(){
-        var key = encodeURIComponent($('#input_apiKey')[0].value);
-        if(key && key.trim() != "") {
-            var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("api_key", key, "query");
-            window.swaggerUi.api.clientAuthorizations.add("api_key", apiKeyAuth);
-            log("added key " + key);
-        }
-      }
+	  function addApiKeyAuthorization(){
+ 	    var key = $('#input_apiKey')[0].value;
+	    if(key && key.trim() != "") {
+            basicAuthCreds = 'pbauth:'+key;
+            basicAuthBase64 = btoa(basicAuthCreds);
+		authString = 'Basic '+basicAuthBase64;
+		// var basicAuth = new SwaggerClient.ApiKeyAuthorization("Authorization", authString, "header");
+		// window.swaggerUi.api.clientAuthorizations.add("pbauth", basicAuth);
+            var basicAuth = new SwaggerClient.PasswordAuthorization('basic', 'pbauth', key);
+            window.swaggerUi.api.clientAuthorizations.add("basicAuth", basicAuth);
+		log("added key " + key);
+            log("basic auth creds: " + basicAuthCreds);
+            log("auth string: " + authString);
+	    }
+	  }
 
       $('#input_apiKey').change(addApiKeyAuthorization);
 
       // if you have an apiKey you would like to pre-populate on the page for demonstration purposes...
-      /*
-        var apiKey = "myApiKeyXXXX123456789";
-        $('#input_apiKey').val(apiKey);
-      */
+      //  var apiKey = '';
+      //  $('#input_apiKey').val(apiKey);
 
       window.swaggerUi.load();
 
@@ -107,7 +112,7 @@
     <a id="logo" href="http://swagger.io">swagger</a>
     <form id='api_selector'>
       <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="text"/></div>
-      <div class='input'><input placeholder="api_key" id="input_apiKey" name="apiKey" type="text"/></div>
+      <div class='input'><input placeholder="auth triple as url params" id="input_apiKey" name="apiKey" type="text"/></div>
       <div class='input'><a id="explore" href="#" data-sw-translate>Explore</a></div>
     </form>
   </div>
